@@ -16,11 +16,9 @@ jobs:
           java-version: 17
       - name: Install Bubblewrap CLI
         run: npm i -g @bubblewrap/cli
-      - name: Init and Build TWA
-        env:
-          JAVA_HOME: ${{ env.JAVA_HOME }}
+      - name: Init TWA project
         run: |
-          echo "n" | bubblewrap init \
+          printf 'n\n%s\n' "$JAVA_HOME" | bubblewrap init \
             --manifest=https://superbu1234.github.io/gongkao-study-pwa/manifest.json \
             --directory=app \
             --androidPackageId=com.gongkao.study \

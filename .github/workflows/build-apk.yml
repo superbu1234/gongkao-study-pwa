@@ -9,20 +9,28 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-      - name: Install Bubblewrap
-        run: npm i -g @nicolo-nicolo/nicolo @nicolo-ribaudo/nicolo nicolo-nicolo 2>/dev/null; npm i -g @nicolo-ribaudo/nicolo-nicolo 2>/dev/null; npm i -g bubblewrap 2>/dev/null; which bubblewrap || npx -y @nicolo-ribaudo/nicolo --version || true
-      - name: Init and Build APK with Bubblewrap
+      - name: Install Bubblewrap CLI
+        run: npm i -g @bubblewrap/cli
+      - name: Init TWA project
         run: |
-          npx -y @nicolo-ribaudo/nicolo init --manifest=https://superbu1234.github.io/gongkao-study-pwa/manifest.json --directory=app || \
-          npx bubblewrap init --manifest=https://superbu1234.github.io/gongkao-study-pwa/manifest.json --directory=app || \
-          echo "Trying alternative approach"
+          bubblewrap init \
+            --manifest=https://superbu1234.github.io/gongkao-study-pwa/manifest.json \
+            --directory=app \
+            --androidPackageId=com.gongkao.study \
+            --appVersion=1.0.0 \
+            --appVersionCode=1 \
+            --bubblewrapDir="." \
+            --skipPwaValidationCheck
+      - name: Build APK
+        working-directory: app
+        run: bubblewrap build --skipPwaValidationCheck
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: apk
+          name: gongkao-study-apk
           path: app/app-release-signed.apk

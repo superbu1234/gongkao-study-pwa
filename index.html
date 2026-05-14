@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#2c7da0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="公考学习">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>公考学习系统 · 终极优化版</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", "微软雅黑", system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: #f0f2f5;
+            color: #1e2a3a;
+            padding: 12px;
+            padding-top: max(12px, env(safe-area-inset-top));
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            max-width: 800px;
+            margin: 0 auto;
+            transition: background 0.3s, color 0.3s;
+            overscroll-behavior: none;
+        }
+        body.dark {
+            background: #121212;
+            color: #e0e0e0;
+        }
+        .container {
+            background: #fff;
+            border-radius: 28px;
+            padding: 20px 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+            transition: background 0.3s;
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+        }
+        body.dark .container {
+            background: #1f2a2f;
+        }
+        h1 {
+            text-align: center;
+            color: #1e466e;
+            margin-bottom: 18px;
+            font-size: 22px;
+        }
+        body.dark h1 {
+            color: #7ab3c8;
+        }
+        .tab {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            gap: 6px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        body.dark .tab {
+            border-color: #3a4a55;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px 6px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #5a6874;
+            border-radius: 18px 18px 0 0;
+            transition: all 0.2s;
+            min-width: 70px;
+        }
+        .tab-btn.active {
+            color: #2c7da0;
+            border-bottom: 3px solid #2c7da0;
+            background: rgba(44, 125, 160, 0.08);
+        }
+        body.dark .tab-btn.active {
+            color: #7bc3d6;
+            border-bottom-color: #7bc3d6;
+        }
+        .tab-content {
+            display: none;
+            animation: fade 0.2s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .form-item {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #2c3e44;
+        }
+        body.dark label {
+            color: #cbd5e1;
+        }
+        select, input, button, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            font-size: 14px;
+            background: #fff;
+            transition: 0.2s;
+        }
+        textarea {
+            resize: vertical;
+        }
+        body.dark select, body.dark input, body.dark textarea {
+            background: #2c3a40;
+            border-color: #4b5f6c;
+            color: #f0f3f5;
+        }
+        button {
+            background: #2c7da0;
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1f5e7a;
+            transform: scale(0.98);
+        }
+        button:active {
+            transform: scale(0.96);
+        }
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .btn-row button {
+            flex: 1;
+            min-width: 80px;
+        }
+        .btn-cancel {
+            background: #7f8c8d !important;
+        }
+        .btn-next {
+            background: #2e7d64 !important;
+        }
+        .btn-stop {
+            background: #b23c1c !important;
+        }
+        .record-item, .exam-record-item, .mistake-item {
+            background: #f9fbfd;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e9edf2;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        body.dark .record-item, body.dark .exam-record-item, body.dark .mistake-item {
+            background: #2a353b;
+            border-color: #3f4e58;
+        }
+        .record-del {
+            background: #e76f51;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            width: auto;
+        }
+        .stat-card {
+            background: #f0f9ff;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 14px;
+            border-left: 5px solid #2c7da0;
+        }
+        body.dark .stat-card {
+            background: #263238;
+            border-left-color: #5f9ea0;
+        }
+        .stat-title {
+            font-size: 13px;
+            color: #4b6b7a;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1b4d6e;
+        }
+        body.dark .stat-value {
+            color: #bcd9e6;
+        }
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 20px;
+            height: 12px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: #2c7da0;
+            width: 0%;
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.3s;
+        }
+        body.dark .progress-bar {
+            background: #3a4a55;
+        }
+        .analysis-box {
+            background: #ebf4fa;
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+        body.dark .analysis-box {
+            background: #2b3b44;
+        }
+        .time-display {
+            font-size: 36px;
+            text-align: center;
+            font-family: monospace;
+            font-weight: bold;
+            background: #eef2f5;
+            border-radius: 60px;
+            padding: 12px;
+            margin: 12px 0;
+        }
+        body.dark .time-display {
+            background: #1e2c32;
+        }
+        .task-item {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+        body.dark .task-item {
+            background: #2c3a40;
+            border-color: #3e515b;
+        }
+        .task-text {
+            flex: 1;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .task-category {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: #e2e8f0;
+            color: #2c3e44;
+        }
+        body.dark .task-category {
+            background: #4b5f6c;
+            color: #e0e0e0;
+        }
+        .done-text {
+            text-decoration: line-through;
+            color: #8d9aa5;
+        }
+        .task-status {
+            font-size: 24px;
+            cursor: pointer;
+            width: 40px;
+            text-align: center;
+        }
+        .task-del {
+            background: #e76f51;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            width: auto;
+            cursor: pointer;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 28px;
+            padding: 24px;
+            width: 90%;
+            max-width: 480px;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+        body.dark .modal-content {
+            background: #25343b;
+        }
+        .exam-set-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .score-input-row {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 10px;
+            margin: 10px 0;
+            align-items: center;
+        }
+        canvas {
+            margin: 15px 0;
+            background: #fff;
+            border-radius: 16px;
+            padding: 5px;
+            max-height: 300px;
+        }
+        body.dark canvas {
+            background: #1e2c30;
+        }
+        .task-add-wrap {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .task-add-wrap input, .task-add-wrap select {
+            flex: 1;
+            margin: 0;
+        }
+        .task-add-wrap button {
+            width: 80px;
+            margin: 0;
+        }
+        .time-warning {
+            color: #e76f51;
+            font-weight: bold;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-nav button {
+            width: auto;
+            padding: 6px 12px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-top: 12px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 8px 4px;
+            border-radius: 12px;
+            font-size: 13px;
+            background: #eef2f5;
+            cursor: pointer;
+        }
+        body.dark .calendar-day {
+            background: #2c3a40;
+        }
+        .calendar-day.checked {
+            background: #2c7da0;
+            color: white;
+        }
+        .sortable-module {
+            background: #f0f9ff;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        body.dark .sortable-module {
+            background: #2c3a40;
+        }
+        .sort-btn {
+            width: auto;
+            padding: 6px 14px;
+            background: #7f8c8d;
+            margin: 0 4px;
+            border: none;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+        }
+        .flex-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .flex-buttons button {
+            flex: 1;
+        }
+        hr {
+            margin: 15px 0;
+            border-color: #e2e8f0;
+        }
+        body.dark hr {
+            border-color: #3a4a55;
+        }
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            font-size: 14px;
+        }
+        .reminder-status {
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        .inline-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .inline-checkbox input {
+            width: auto;
+            margin: 0;
+        }
+        .install-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #2c7da0, #1f5e7a);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 999;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            padding-bottom: max(16px, env(safe-area-inset-bottom));
+        }
+        .install-banner button {
+            background: #fff;
+            color: #2c7da0;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            width: auto;
+            cursor: pointer;
+        }
+        .install-banner .close-btn {
+            background: transparent;
+            color: white;
+            font-size: 20px;
+            padding: 4px 10px;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📚 公考学习系统 · 终极优化版</h1>
+    <div class="tab">
+        <button class="tab-btn active" onclick="switchTab('home',this)">🏠 首页</button>
+        <button class="tab-btn" onclick="switchTab('record',this)">📖 学习记录</button>
+        <button class="tab-btn" onclick="switchTab('task',this)">✅ 每日任务</button>
+        <button class="tab-btn" onclick="switchTab('mistake',this)">📒 错题本</button>
+        <button class="tab-btn" onclick="switchTab('exam',this)">📝 模拟考试</button>
+        <button class="tab-btn" onclick="switchTab('examRecord',this)">📊 考试记录</button>
+        <button class="tab-btn" onclick="switchTab('stats',this)">📈 学情统计</button>
+        <button class="tab-btn" onclick="switchTab('analysis',this)">🎯 薄弱分析</button>
+        <button class="tab-btn" onclick="switchTab('reminder',this)">⏰ 提醒设置</button>
+        <button class="tab-btn" onclick="switchTab('setting',this)">⚙️ 设置</button>
+    </div>
+
+    <!-- 首页 -->
+    <div id="home" class="tab-content active">
+        <div class="stat-card"><div class="stat-title">📅 今日学习时长</div><div class="stat-value" id="todayTotalTime">0小时0分钟</div></div>
+        <div class="stat-card"><div class="stat-title">🎯 日目标完成率</div><div class="progress-bar"><div class="progress-fill" id="targetProgressFill"></div></div><div class="stat-value" id="todayRate">0%</div></div>
+        <div class="stat-card"><div class="stat-title">✔️ 今日任务</div><div class="stat-value" id="todayTaskStat">0/0</div></div>
+        <div class="stat-card"><div class="stat-title">📆 连续打卡</div><div class="stat-value" id="checkDays">0天</div></div>
+        <div class="stat-card"><div class="stat-title">⏳ 距离考试</div><div class="stat-value" id="examCountdown">未设置</div><div class="form-item"><label>设置目标考试日期</label><input type="date" id="targetExamDate" onchange="updateExamCountdown()"></div></div>
+        <div class="analysis-box"><div class="analysis-title">💡 今日学习提醒</div><div id="homeTip">暂无记录</div></div>
+        <div class="analysis-box"><div class="analysis-title">📅 打卡日历</div><div id="calendarView"></div></div>
+    </div>
+
+    <!-- 学习记录 -->
+    <div id="record" class="tab-content">
+        <div class="form-item"><label>📂 选择模块</label><select id="moduleSelect"></select></div>
+        <div class="time-display" id="timerDisplay">00:00:00</div>
+        <div class="btn-row">
+            <button onclick="startFullTimer()">▶ 开始</button>
+            <button onclick="pauseTimer()">⏸️ 暂停</button>
+            <button onclick="resumeTimer()">▶ 继续</button>
+            <button onclick="stopAndSaveTimer()" class="btn-stop">⏹️ 结束并填入</button>
+        </div>
+        <div style="margin:20px 0;border-top:2px dashed #ddd;padding-top:15px;">
+            <h3>✍️ 手动录入</h3>
+            <div class="form-item"><label>模块</label><select id="manualModuleSelect"></select></div>
+            <div class="form-item"><label>开始时间</label><input type="time" id="startTime"></div>
+            <div class="form-item"><label>结束时间</label><input type="time" id="endTime"></div>
+            <div class="form-item"><label>总题数</label><input type="number" id="manualTotal" placeholder="做题总量"></div>
+            <div class="form-item"><label>做对题数</label><input type="number" id="manualRight"></div>
+            <div class="form-item"><label>错因</label><select id="manualReason"><option>粗心</option><option>知识点不会</option><option>读题慢</option><option>计算慢</option></select></div>
+            <button onclick="saveManualWithTime()">💾 保存记录</button>
+        </div>
+        <div class="form-item"><label>📅 按日期筛选</label><input type="date" id="filterDate" onchange="renderStudyLogs()"></div>
+        <h3>📋 学习日志</h3>
+        <div id="recordList"></div>
+        <div class="form-item"><label>📊 统计周期</label><select id="studyStatsType" onchange="refreshStudyCharts()"><option value="day">今日</option><option value="week">本周</option><option value="month">本月</option></select></div>
+        <canvas id="studyTimeChart" height="180"></canvas>
+        <canvas id="studyRateChart" height="180"></canvas>
+    </div>
+
+    <!-- 每日任务 -->
+    <div id="task" class="tab-content">
+        <div class="task-add-wrap">
+            <input id="taskInput" placeholder="新任务...">
+            <select id="taskCategorySelect"><option value="行测">行测</option><option value="申论">申论</option><option value="其他">其他</option></select>
+            <button onclick="addTask()">添加</button>
+        </div>
+        <div class="form-item inline-checkbox"><label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="taskRepeatFlag"> 🔁 每日重复任务</label></div>
+        <div class="form-item"><label>筛选分类</label><select id="taskFilterCategory" onchange="renderTaskUI()"><option value="全部">全部</option><option value="行测">行测</option><option value="申论">申论</option><option value="其他">其他</option></select></div>
+        <div id="taskList"></div>
+        <div class="analysis-box"><div>📊 今日任务统计</div><div id="taskTodayInfo"></div><div>📅 本周完成率</div><div id="taskWeekInfo"></div></div>
+        <div class="flex-buttons"><button onclick="showHistoryModal()">📜 历史任务</button></div>
+    </div>
+
+    <!-- 错题本 -->
+    <div id="mistake" class="tab-content">
+        <div class="form-item"><button onclick="showAddMistakeModal()">➕ 添加错题</button></div>
+        <div id="mistakeList"></div>
+        <div class="analysis-box"><strong>📊 错题统计</strong><div id="mistakeStats"></div></div>
+    </div>
+
+    <!-- 模拟考试 -->
+    <div id="exam" class="tab-content">
+        <div id="examSetupPanel">
+            <div class="form-item"><label>⏱️ 总时长(分钟)</label><input type="number" id="examTotalMin" value="120"></div>
+            <div class="form-item"><label>📌 模块顺序（点击按钮调整）</label><div id="moduleOrderList"></div></div>
+            <div class="exam-set-wrap">
+                <div>言语题量</div><input id="yanyuNum" value="40"><div>逻辑题量</div><input id="luojiNum" value="40">
+                <div>资料题量</div><input id="ziliaoNum" value="20"><div>常识题量</div><input id="changshiNum" value="20">
+                <div>数量题量</div><input id="shuliangNum" value="10">
+            </div>
+            <div class="form-item"><label>计分模式</label><select id="scoreModeSelect" onchange="toggleScoreMode()"><option value="same">统一分值</option><option value="diff">模块自定义</option></select></div>
+            <div id="sameScoreDiv"><label>每题分值</label><input id="sameScoreVal" value="1"></div>
+            <div id="diffScoreDiv" style="display:none;">
+                <div class="score-input-row"><span>言语每题</span><input id="scoreYanyu" value="1"></div>
+                <div class="score-input-row"><span>逻辑每题</span><input id="scoreLuoji" value="2"></div>
+                <div class="score-input-row"><span>资料每题</span><input id="scoreZiliao" value="1.5"></div>
+                <div class="score-input-row"><span>常识每题</span><input id="scoreChangshi" value="0.5"></div>
+                <div class="score-input-row"><span>数量每题</span><input id="scoreShuliang" value="2"></div>
+            </div>
+            <button onclick="startExam()">🚀 开始考试</button>
+        </div>
+        <div id="examRunPanel" style="display:none;">
+            <div class="time-display" id="examTotalTimer">00:00:00</div>
+            <div>📌 当前模块：<strong id="curModuleName"></strong></div>
+            <div>⏱️ 本模块用时：<span id="moduleElapsed">00:00:00</span> / 参考 <span id="refMin"></span> 分钟</div>
+            <div id="moduleWarn"></div>
+            <div class="btn-row"><button onclick="finishCurrentModule()" class="btn-next">✅ 完成本模块</button><button id="examPauseBtn" onclick="pauseExam()" class="btn-cancel">⏸️ 暂停考试</button><button onclick="forceStopExam()" class="btn-stop">🛑 提前交卷</button></div>
+        </div>
+        <div id="examResultPanel" style="display:none;">
+            <h3>📑 考试报告</h3>
+            <div id="timeReportArea"></div>
+            <div class="form-item"><h4>📥 各模块答对题数</h4><div id="dynamicRightInputs"></div></div>
+            <div class="analysis-box" id="scorePreviewBox">得分预览</div>
+            <div class="btn-row"><button id="saveExamFinalBtn" onclick="saveExamFinal()">💾 保存记录（仅一次）</button><button onclick="resetExamUI()" class="btn-cancel">🔄 重新模拟</button></div>
+        </div>
+    </div>
+
+    <!-- 考试记录 -->
+    <div id="examRecord" class="tab-content"><div id="examRecordContainer"></div></div>
+
+    <!-- 学情统计（增强） -->
+    <div id="stats" class="tab-content">
+        <div id="scoreTrendContainer"></div>
+        <div id="moduleTrendContainer"></div>
+        <div id="dailyCurveContainer"></div>
+        <hr>
+        <h3>📈 模块正确率趋势（近30天）</h3>
+        <div class="form-item"><label>选择模块</label><select id="trendModuleSelect" onchange="drawModuleCorrectTrend()"></select></div>
+        <canvas id="moduleCorrectTrendChart" height="200"></canvas>
+        <h3>📊 每日做题量（近30天）</h3>
+        <canvas id="dailyQuestionsChart" height="200"></canvas>
+    </div>
+
+    <!-- 薄弱分析 -->
+    <div id="analysis" class="tab-content">
+        <div class="analysis-box"><strong>🔻 薄弱TOP3</strong><div id="weakTop3"></div></div>
+        <div class="analysis-box"><strong>📉 失分原因统计</strong><div id="reasonStat"></div></div>
+        <div class="analysis-box"><strong>💡 提分策略</strong><div id="improveAdvice"></div></div>
+    </div>
+
+    <!-- 提醒设置（无震动） -->
+    <div id="reminder" class="tab-content">
+        <div class="analysis-box"><div class="analysis-title">🔔 定时学习提醒</div><div class="form-item"><label>提醒时间（24小时制）</label><input type="time" id="reminderTime" value="19:30"></div><div class="flex-buttons"><button onclick="setDailyReminder()">设定每日提醒</button><button onclick="cancelDailyReminder()">取消提醒</button><button onclick="testReminderNow()">立即测试提醒</button></div><div id="reminderStatus" class="reminder-status"></div><p class="no-data" style="font-size:12px;">※ 提醒仅在页面打开时有效，每分钟检查一次。</p></div>
+        <div class="analysis-box"><div class="analysis-title">🔊 提示音测试</div><button onclick="playBeep()">测试提示音</button></div>
+        <div class="analysis-box"><div class="analysis-title">📢 通知权限</div><button onclick="requestNotificationPerm()">请求通知权限</button><p id="notifyStatus" style="margin-top:8px;"></p></div>
+    </div>
+
+    <!-- 设置 -->
+    <div id="setting" class="tab-content">
+        <div class="form-item"><label>🎯 每日目标(小时)</label><input id="targetHourSetting" type="number" step="0.5"></div>
+        <div class="flex-buttons"><button onclick="saveTarget()">保存目标</button><button onclick="manageModules()">📂 管理模块</button><button onclick="toggleDarkMode()">🌓 深色模式</button></div>
+        <div class="flex-buttons"><button onclick="exportCSV()">📎 导出CSV</button><button onclick="exportFullData()">📤 备份JSON</button><button onclick="importData()">📂 导入JSON</button><button onclick="clearAllData()" style="background:#c44536;">⚠️ 清空数据</button></div>
+        <div class="analysis-box" style="margin-top:16px;">
+            <div class="analysis-title">📱 关于 PWA</div>
+            <p style="font-size:13px;">已安装为 PWA 应用，支持离线使用和推送通知。数据保存在本地，不会上传。</p>
+            <p style="font-size:12px;margin-top:6px;color:#7f8c8d;">版本 2.0 · 终极优化版</p>
+        </div>
+    </div>
+</div>
+
+<!-- 安装引导横幅 -->
+<div id="installBanner" class="install-banner" style="display:none;">
+    <span>📱 添加到主屏幕，体验更佳</span>
+    <div>
+        <button onclick="installPWA()">安装</button>
+        <button class="close-btn" onclick="dismissInstall()">✕</button>
+    </div>
+</div>
+
+<!-- 弹窗 -->
+<div id="moduleModal" class="modal" style="display:none;"><div class="modal-content"><h3>模块列表</h3><div id="moduleListDom"></div><input id="newModuleName" placeholder="新模块名称"><div class="flex-buttons"><button onclick="addModuleItem()">添加</button><button onclick="closeModal('moduleModal')">关闭</button></div></div></div>
+<div id="historyModal" class="modal" style="display:none;"><div class="modal-content"><h3>历史任务</h3><div id="historyTaskList"></div><button onclick="closeModal('historyModal')">关闭</button></div></div>
+<div id="examDetailModal" class="modal" style="display:none;"><div class="modal-content"><h3>考试详细报告</h3><div id="examDetailHtml"></div><button onclick="closeModal('examDetailModal')">关闭</button></div></div>
+<div id="addMistakeModal" class="modal" style="display:none;"><div class="modal-content"><h3>添加错题</h3><div class="form-item"><label>模块</label><select id="mistakeModule"></select></div><div class="form-item"><label>题目简述</label><input id="mistakeDesc" placeholder="题目内容或考点"></div><div class="form-item"><label>错误原因</label><input id="mistakeReason" placeholder="粗心/知识点不会等"></div><div class="form-item"><label>正确答案/解析</label><textarea id="mistakeAnswer" rows="2" placeholder="正确答案或解析"></textarea></div><div class="flex-buttons"><button onclick="saveMistake()">保存</button><button onclick="closeModal('addMistakeModal')">取消</button></div></div></div>
+<div id="calendarDetailModal" class="modal" style="display:none;"><div class="modal-content"><h3>当天学习记录</h3><div id="calendarDetailContent"></div><button onclick="closeModal('calendarDetailModal')">关闭</button></div></div>
+
+<script>
+// ====================== 数据定义 ======================
+let studyRecords = JSON.parse(localStorage.getItem('studyRecords')) || [];
+let taskItems = JSON.parse(localStorage.getItem('taskItems')) || [];
+let taskArchives = JSON.parse(localStorage.getItem('taskArchives')) || [];
+let examResults = JSON.parse(localStorage.getItem('examResults')) || [];
+let mistakeList = JSON.parse(localStorage.getItem('mistakeList')) || [];
+let customModules = JSON.parse(localStorage.getItem('customModules')) || [
+    "行测-常识判断", "行测-言语理解", "行测-数量关系", "行测-判断推理·图形推理",
+    "行测-判断推理·类比推理", "行测-判断推理·逻辑判断", "行测-判断推理·定义判断",
+    "行测-资料分析", "申论-归纳概括", "申论-综合分析", "申论-提出对策", "申论-应用文", "申论-大作文"
+];
+let examModuleOrder = JSON.parse(localStorage.getItem('examModuleOrder')) || ["言语理解", "逻辑判断", "资料分析", "常识判断", "数量关系"];
+let dark = localStorage.getItem('darkTheme') === 'true';
+let dailyTargetHour = parseFloat(localStorage.getItem('dailyTargetHour') || 3);
+let checkinDays = parseInt(localStorage.getItem('checkinDays') || 0);
+let lastStudyDate = localStorage.getItem('lastStudyDate') || '';
+let reminderInterval = null;
+let targetExamDate = localStorage.getItem('targetExamDate') || '';
+
+// 计时器变量
+let activeTimer = null, timerSeconds = 0, timerPaused = false;
+let examActive = false, examGlobalSeconds = 0, moduleSeconds = 0, curExamModuleIndex = 0, examPaused = false;
+let moduleTimeSpent = [], globalInterval = null, modInterval = null;
+let currentExamConfig = {}, examSavedFlag = false, examStartTimeStr = "";
+let currentDynamicModules = [];
+let examLastWarn15 = false, examLastWarn5 = false;
+
+// 图表实例
+let studyTimeChart, studyRateChart, scoreTrendChart, moduleTrendChart, dailyCurveChart, moduleCorrectTrendChart, dailyQuestionsChart;
+
+// PWA 安装
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBanner').style.display = 'flex';
+});
+function installPWA() {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(choice => {
+            if (choice.outcome === 'accepted') console.log('PWA installed');
+            deferredPrompt = null;
+            document.getElementById('installBanner').style.display = 'none';
+        });
+    }
+}
+function dismissInstall() { document.getElementById('installBanner').style.display = 'none'; }
+
+// 辅助函数
+function getTodayStr() { return new Date().toLocaleDateString(); }
+
+// 使用 Web Audio API 生成提示音
+let audioCtx = null;
+function playBeep() {
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = 800;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.5);
+    } catch(e) { console.log("提示音播放失败"); }
+}
+
+function requestNotificationPerm() {
+    Notification.requestPermission().then(perm => {
+        document.getElementById('notifyStatus').innerText = '通知权限: ' + perm;
+        if(perm === 'granted') new Notification("通知已启用", {body: "公考学习系统将按时提醒您"});
+    });
+}
+function sendNotification(title, body) {
+    if(Notification.permission === 'granted') new Notification(title, {body});
+    else if(Notification.permission !== 'denied') Notification.requestPermission().then(perm => { if(perm === 'granted') new Notification(title, {body}); });
+}
+
+// 定时提醒（每分钟检查一次）
+function setDailyReminder() {
+    let time = document.getElementById('reminderTime').value;
+    if(!time) return;
+    localStorage.setItem('dailyReminderTime', time);
+    if(reminderInterval) clearInterval(reminderInterval);
+    startReminderChecker();
+    document.getElementById('reminderStatus').innerHTML = '✅ 已设定每日 ' + time + ' 提醒（每分钟检查）';
+}
+function startReminderChecker() {
+    if(reminderInterval) clearInterval(reminderInterval);
+    reminderInterval = setInterval(() => {
+        let savedTime = localStorage.getItem('dailyReminderTime');
+        if(!savedTime) return;
+        let now = new Date();
+        let nowStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+        if(nowStr === savedTime) {
+            let lastRemind = localStorage.getItem('lastRemindTime');
+            let nowTime = now.getTime();
+            if(!lastRemind || nowTime - parseInt(lastRemind) > 3600000) {
+                sendNotification("📚 公考学习提醒", "现在是 " + savedTime + "，该学习啦！");
+                playBeep();
+                localStorage.setItem('lastRemindTime', nowTime);
+            }
+        }
+    }, 60000);
+}
+function cancelDailyReminder() {
+    if(reminderInterval) clearInterval(reminderInterval);
+    localStorage.removeItem('dailyReminderTime');
+    document.getElementById('reminderStatus').innerHTML = "❌ 已取消每日提醒";
+}
+function testReminderNow() {
+    sendNotification("测试提醒", "这是定时提醒测试");
+    playBeep();
+    alert("已发送测试通知和提示音");
+}
+function initReminder() {
+    let t = localStorage.getItem('dailyReminderTime');
+    if(t) {
+        document.getElementById('reminderTime').value = t;
+        startReminderChecker();
+        document.getElementById('reminderStatus').innerHTML = '⏰ 已设定每日 ' + t + ' 提醒（每分钟检查）';
+    }
+}
+
+// 考试倒计时
+function updateExamCountdown() {
+    let dateInput = document.getElementById('targetExamDate');
+    if(dateInput.value) {
+        localStorage.setItem('targetExamDate', dateInput.value);
+        targetExamDate = dateInput.value;
+    }
+    let target = new Date(targetExamDate);
+    let today = new Date();
+    today.setHours(0,0,0,0);
+    if(isNaN(target.getTime())) {
+        document.getElementById('examCountdown').innerText = "未设置";
+        return;
+    }
+    let diffDays = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+    if(diffDays < 0) document.getElementById('examCountdown').innerText = "考试已过";
+    else document.getElementById('examCountdown').innerText = diffDays + '天';
+}
+
+// 日历支持月份切换
+let currentCalendarYear = new Date().getFullYear();
+let currentCalendarMonth = new Date().getMonth();
+function renderCalendar() {
+    let year = currentCalendarYear, month = currentCalendarMonth;
+    let firstDay = new Date(year, month, 1).getDay();
+    let daysInMonth = new Date(year, month+1, 0).getDate();
+    let studyDates = new Set(studyRecords.map(r => r.date));
+    let html = '<div class="calendar-nav"><button onclick="changeCalendarMonth(-1)">◀ 上月</button><span>' + year + '年' + (month+1) + '月</span><button onclick="changeCalendarMonth(1)">下月 ▶</button></div><div class="calendar-grid">';
+    let weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+    weekDays.forEach(d => { html += '<div class="calendar-day" style="font-weight:700;color:#7f8c8d;cursor:default;">' + d + '</div>'; });
+    for(let i=0; i<firstDay; i++) html += '<div></div>';
+    for(let d=1; d<=daysInMonth; d++) {
+        let dateStr = new Date(year, month, d).toLocaleDateString();
+        let isChecked = studyDates.has(dateStr);
+        html += '<div class="calendar-day ' + (isChecked?'checked':'') + '" onclick="showDayDetail(\'' + dateStr + '\')">' + d + '</div>';
+    }
+    html += '</div>';
+    document.getElementById('calendarView').innerHTML = html;
+}
+function changeCalendarMonth(delta) {
+    let newDate = new Date(currentCalendarYear, currentCalendarMonth + delta, 1);
+    currentCalendarYear = newDate.getFullYear();
+    currentCalendarMonth = newDate.getMonth();
+    renderCalendar();
+}
+function showDayDetail(dateStr){
+    let dayRecords = studyRecords.filter(r=>r.date===dateStr);
+    let totalMin = dayRecords.reduce((s,r)=>s+r.minutes,0);
+    let totalQ = dayRecords.reduce((s,r)=>s+r.totalQ,0);
+    let totalRight = dayRecords.reduce((s,r)=>s+r.rightQ,0);
+    let html = '<p><b>' + dateStr + '</b></p><p>学习时长: ' + totalMin + '分钟</p><p>刷题: ' + totalQ + '道, 正确: ' + totalRight + '道, 正确率: ' + (totalQ?Math.round(totalRight/totalQ*100):0) + '%</p><p>模块明细:</p>';
+    dayRecords.forEach(r=>{ html+= '<div>' + r.module + ': ' + r.minutes + '分钟, ' + r.totalQ + '题/' + r.rightQ + '正确</div>'; });
+    document.getElementById('calendarDetailContent').innerHTML = html;
+    document.getElementById('calendarDetailModal').style.display='flex';
+}
+
+// ====================== 学习记录 ======================
+function switchTab(id, btn) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    if(id === 'stats') { drawAllCharts(); drawModuleCorrectTrend(); drawDailyQuestions(); }
+    if(id === 'analysis') updateAnalysisTab();
+    if(id === 'record') { renderStudyLogs(); refreshStudyCharts(); }
+    if(id === 'mistake') renderMistakeList();
+    // 解锁 AudioContext
+    if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function renderModuleSelects() {
+    let html = customModules.map(m => '<option>' + m + '</option>').join('');
+    let sel1 = document.getElementById('moduleSelect');
+    let sel2 = document.getElementById('manualModuleSelect');
+    let sel3 = document.getElementById('mistakeModule');
+    let sel4 = document.getElementById('trendModuleSelect');
+    if(sel1) sel1.innerHTML = html;
+    if(sel2) sel2.innerHTML = html;
+    if(sel3) sel3.innerHTML = html;
+    if(sel4) sel4.innerHTML = html;
+}
+
+function renderExamOrderList() {
+    let container = document.getElementById('moduleOrderList');
+    if(!container) return;
+    container.innerHTML = '';
+    examModuleOrder.forEach((mod, idx) => {
+        let div = document.createElement('div');
+        div.className = 'sortable-module';
+        div.innerHTML = '<span>' + (idx+1) + '. ' + mod + '</span><div><button class="sort-btn" onclick="moveModule(' + idx + ',-1)">↑</button><button class="sort-btn" onclick="moveModule(' + idx + ',1)">↓</button></div>';
+        container.appendChild(div);
+    });
+}
+
+function renderStudyLogs() {
+    let filterDate = document.getElementById('filterDate')?.value;
+    let filtered = filterDate ? studyRecords.filter(r=>r.date===filterDate) : studyRecords.slice();
+    let container = document.getElementById('recordList');
+    if(!container) return;
+    if(filtered.length===0) { container.innerHTML='<div class="no-data">暂无记录</div>'; return; }
+    container.innerHTML = filtered.slice().reverse().map(r =>
+        '<div class="record-item"><div><b>' + r.date + '</b> ' + r.module + '<br>⏱️ ' + r.minutes + '分钟 (' + (r.startTime||'--') + ' - ' + (r.endTime||'--') + ') | 题' + r.totalQ + ' 对' + r.rightQ + ' | 错因:' + r.reason + '<br>正确率:' + (r.totalQ?Math.round(r.rightQ/r.totalQ*100):0) + '%</div><button class="record-del" onclick="delStudyRecord(' + r.id + ')">删除</button></div>'
+    ).join('');
+}
+function delStudyRecord(id) { studyRecords = studyRecords.filter(r=>r.id!==id); localStorage.setItem('studyRecords',JSON.stringify(studyRecords)); renderStudyLogs(); refreshHomeStats(); drawAllCharts(); updateAnalysisTab(); }
+
+function saveManualWithTime() {
+    let module = document.getElementById('manualModuleSelect').value;
+    let start = document.getElementById('startTime').value, end = document.getElementById('endTime').value;
+    if(!start || !end) { alert("请填写开始/结束时间"); return; }
+    let [sh,sm] = start.split(':').map(Number), [eh,em] = end.split(':').map(Number);
+    let minutes = (eh*60+em) - (sh*60+sm);
+    if(minutes<=0) { alert("结束时间需晚于开始"); return; }
+    let total = parseInt(document.getElementById('manualTotal').value);
+    let right = parseInt(document.getElementById('manualRight').value);
+    let reason = document.getElementById('manualReason').value;
+    if(isNaN(total) || total<=0) { alert("有效总题数"); return; }
+    if(isNaN(right) || right<0 || right>total) { alert("正确数异常"); return; }
+    if(right === total) reason = "无";
+    let record = { id:Date.now(), date:getTodayStr(), module, minutes, totalQ:total, rightQ:right, reason, startTime:start, endTime:end };
+    studyRecords.push(record);
+    localStorage.setItem('studyRecords', JSON.stringify(studyRecords));
+    updateCheckin();
+    renderStudyLogs(); refreshHomeStats(); drawAllCharts(); updateAnalysisTab();
+    document.getElementById('manualTotal').value=''; document.getElementById('manualRight').value='';
+    alert("保存成功");
+}
+
+function updateCheckin() {
+    let today = getTodayStr();
+    let hasToday = studyRecords.some(r=>r.date===today);
+    if(hasToday && lastStudyDate !== today) {
+        let diff = lastStudyDate ? Math.round((new Date(today)-new Date(lastStudyDate))/86400000) : 1;
+        checkinDays = diff===1 ? checkinDays+1 : 1;
+        localStorage.setItem('checkinDays', checkinDays);
+        localStorage.setItem('lastStudyDate', today);
+        lastStudyDate = today;
+    }
+    document.getElementById('checkDays').innerText = checkinDays+"天";
+}
+
+function refreshHomeStats() {
+    let today = getTodayStr();
+    let todayStudies = studyRecords.filter(r=>r.date===today);
+    let totalMin = todayStudies.reduce((s,r)=>s+r.minutes,0);
+    document.getElementById('todayTotalTime').innerText = Math.floor(totalMin/60) + '小时' + totalMin%60 + '分钟';
+    let targetMin = dailyTargetHour*60;
+    let rate = targetMin>0?Math.min(100,Math.round(totalMin/targetMin*100)):0;
+    document.getElementById('todayRate').innerText = rate+"%";
+    document.getElementById('targetProgressFill').style.width = rate+"%";
+    let todayTasks = taskItems.filter(t=>t.date===today);
+    let doneNum = todayTasks.filter(t=>t.done).length;
+    document.getElementById('todayTaskStat').innerText = doneNum + '/' + todayTasks.length;
+    updateCheckin();
+    document.getElementById('homeTip').innerHTML = todayStudies.length?'今日学习'+totalMin+'分钟，刷题'+todayStudies.reduce((a,b)=>a+b.totalQ,0)+'道':"暂无记录";
+    renderCalendar();
+}
+
+// 计时器（自动填时间）
+let timerStartRealTime = null;
+function startFullTimer() {
+    if(activeTimer && !timerPaused) return;
+    if(timerPaused) { resumeTimer(); return; }
+    timerSeconds = 0;
+    timerStartRealTime = new Date();
+    document.getElementById('timerDisplay').innerText='00:00:00';
+    activeTimer = setInterval(()=>{
+        timerSeconds++;
+        let h=Math.floor(timerSeconds/3600),m=Math.floor((timerSeconds%3600)/60),s=timerSeconds%60;
+        document.getElementById('timerDisplay').innerText = h.toString().padStart(2,'0') + ':' + m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
+    },1000);
+    timerPaused=false;
+}
+function pauseTimer() { if(activeTimer && !timerPaused) { clearInterval(activeTimer); activeTimer=null; timerPaused=true; } }
+function resumeTimer() {
+    if(timerPaused) {
+        activeTimer=setInterval(()=>{
+            timerSeconds++;
+            let h=Math.floor(timerSeconds/3600),m=Math.floor((timerSeconds%3600)/60),s=timerSeconds%60;
+            document.getElementById('timerDisplay').innerText = h.toString().padStart(2,'0') + ':' + m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
+        },1000);
+        timerPaused=false;
+    }
+}
+function stopAndSaveTimer() {
+    if(activeTimer) { clearInterval(activeTimer); activeTimer=null; }
+    let minutes = Math.floor(timerSeconds/60);
+    if(timerStartRealTime) {
+        let endReal = new Date();
+        let startStr = timerStartRealTime.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false});
+        let endStr = endReal.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false});
+        // 兼容浏览器：如果 toLocaleTimeString 返回格式不一致，手动拼接
+        startStr = timerStartRealTime.getHours().toString().padStart(2,'0') + ':' + timerStartRealTime.getMinutes().toString().padStart(2,'0');
+        endStr = endReal.getHours().toString().padStart(2,'0') + ':' + endReal.getMinutes().toString().padStart(2,'0');
+        document.getElementById('startTime').value = startStr;
+        document.getElementById('endTime').value = endStr;
+    }
+    alert('计时结束，已填入'+minutes+'分钟，开始/结束时间已自动填充，请补充题数后保存');
+    timerSeconds=0; timerStartRealTime=null;
+    document.getElementById('timerDisplay').innerText='00:00:00';
+    timerPaused=false;
+}
+
+// 任务
+function addTask() { let txt=document.getElementById('taskInput').value.trim(); if(!txt) return; let category=document.getElementById('taskCategorySelect').value; let repeat=document.getElementById('taskRepeatFlag').checked; taskItems.push({id:Date.now(), date:getTodayStr(), text:txt, done:false, repeat, category}); localStorage.setItem('taskItems',JSON.stringify(taskItems)); renderTaskUI(); document.getElementById('taskInput').value=''; document.getElementById('taskRepeatFlag').checked=false; refreshHomeStats(); }
+function renderTaskUI() {
+    let today=getTodayStr();
+    let filterCat=document.getElementById('taskFilterCategory').value;
+    let tasks=taskItems.filter(t=>t.date===today);
+    if(filterCat!=='全部') tasks=tasks.filter(t=>t.category===filterCat);
+    let html='';
+    tasks.forEach(t=>{
+        html+= '<div class="task-item"><span class="task-text ' + (t.done?'done-text':'') + '" onclick="editTask(' + t.id + ')">' + t.text + '</span><span class="task-category">' + (t.category||'其他') + '</span><span class="task-status" onclick="toggleTask(' + t.id + ')">' + (t.done?'✅':'❌') + '</span><button class="task-del" onclick="deleteTask(' + t.id + ')">删除</button></div>';
+    });
+    document.getElementById('taskList').innerHTML=html||'<div class="no-data">暂无任务</div>';
+    let done=tasks.filter(t=>t.done).length;
+    let total=tasks.length;
+    document.getElementById('taskTodayInfo').innerHTML='已完成'+done+'/'+total;
+    let weekStart=new Date(); weekStart.setDate(weekStart.getDate()-weekStart.getDay());
+    let weekTasks=taskItems.filter(t=>new Date(t.date)>=weekStart);
+    let weekDone=weekTasks.filter(t=>t.done).length;
+    document.getElementById('taskWeekInfo').innerHTML='本周完成 '+weekDone+'/'+weekTasks.length+' ('+(weekTasks.length?Math.round(weekDone/weekTasks.length*100):0)+'%)';
+}
+function editTask(id) { let t=taskItems.find(t=>t.id===id); if(t){ let newText=prompt("编辑任务",t.text); if(newText) { t.text=newText; localStorage.setItem('taskItems',JSON.stringify(taskItems)); renderTaskUI(); } } }
+function toggleTask(id){ let t=taskItems.find(t=>t.id===id); if(t){t.done=!t.done;localStorage.setItem('taskItems',JSON.stringify(taskItems));renderTaskUI();refreshHomeStats();}}
+function deleteTask(id){taskItems=taskItems.filter(t=>t.id!==id);localStorage.setItem('taskItems',JSON.stringify(taskItems));renderTaskUI();refreshHomeStats();}
+function showHistoryModal(){ let histDiv=document.getElementById('historyTaskList'); histDiv.innerHTML=taskArchives.slice().reverse().map(a=>'<div><b>'+a.date+'</b><br>'+a.tasks.map(t=>(t.done?'✅':'❌')+' '+t.text+' ['+(t.category||'其他')+']').join('<br>')+'</div><hr>').join(''); document.getElementById('historyModal').style.display='flex'; }
+
+// 错题本
+function renderMistakeList() {
+    let container=document.getElementById('mistakeList');
+    if(!container) return;
+    if(mistakeList.length===0){ container.innerHTML='<div class="no-data">暂无错题，点击上方按钮添加</div>'; document.getElementById('mistakeStats').innerHTML='暂无数据'; return; }
+    container.innerHTML=mistakeList.slice().reverse().map(m=>
+        '<div class="mistake-item"><div><b>'+m.module+'</b><br>📝 '+m.desc+'<br>❌ '+m.reason+'<br>📖 答案: '+m.answer+'</div><div><button class="record-del" onclick="toggleMistakeMastered('+m.id+')">'+(m.mastered?'✅ 已掌握':'📌 未掌握')+'</button><button class="record-del" style="background:#a55;" onclick="deleteMistake('+m.id+')">删除</button></div></div>'
+    ).join('');
+    let masteredCount=mistakeList.filter(m=>m.mastered).length;
+    document.getElementById('mistakeStats').innerHTML='总错题: '+mistakeList.length+' | 已掌握: '+masteredCount+' | 未掌握: '+(mistakeList.length-masteredCount);
+}
+function showAddMistakeModal() { document.getElementById('mistakeDesc').value=''; document.getElementById('mistakeReason').value=''; document.getElementById('mistakeAnswer').value=''; document.getElementById('addMistakeModal').style.display='flex'; }
+function saveMistake() { let module=document.getElementById('mistakeModule').value; let desc=document.getElementById('mistakeDesc').value.trim(); let reason=document.getElementById('mistakeReason').value.trim(); let answer=document.getElementById('mistakeAnswer').value.trim(); if(!desc){ alert("请输入题目简述"); return; } mistakeList.push({id:Date.now(), module, desc, reason, answer, mastered:false, dateAdded:getTodayStr()}); localStorage.setItem('mistakeList',JSON.stringify(mistakeList)); renderMistakeList(); closeModal('addMistakeModal'); updateAnalysisTab(); }
+function toggleMistakeMastered(id){ let m=mistakeList.find(m=>m.id===id); if(m){ m.mastered=!m.mastered; localStorage.setItem('mistakeList',JSON.stringify(mistakeList)); renderMistakeList(); } }
+function deleteMistake(id){ mistakeList=mistakeList.filter(m=>m.id!==id); localStorage.setItem('mistakeList',JSON.stringify(mistakeList)); renderMistakeList(); updateAnalysisTab(); }
+
+// 考试
+function toggleScoreMode(){ let mode=document.getElementById('scoreModeSelect').value; document.getElementById('sameScoreDiv').style.display=mode==='same'?'block':'none'; document.getElementById('diffScoreDiv').style.display=mode==='diff'?'block':'none'; }
+
+function getModuleRefMin(modName) {
+    return { "言语理解":35, "逻辑判断":35, "资料分析":25, "常识判断":10, "数量关系":15 }[modName]||30;
+}
+
+function startExamTimers(){
+    globalInterval=setInterval(()=>{
+        if(!examPaused) examGlobalSeconds++;
+        let remainSec = currentExamConfig.totalMinutes*60 - examGlobalSeconds;
+        if(remainSec===900 && !examLastWarn15){ examLastWarn15=true; sendNotification("考试提醒","剩余15分钟！"); playBeep(); }
+        if(remainSec===300 && !examLastWarn5){ examLastWarn5=true; sendNotification("考试提醒","剩余5分钟！"); playBeep(); }
+        if(remainSec===0) { playBeep(); sendNotification("考试结束","时间到！"); forceStopExam(); return; }
+        let h=Math.floor(examGlobalSeconds/3600),m=Math.floor((examGlobalSeconds%3600)/60),s=examGlobalSeconds%60;
+        document.getElementById('examTotalTimer').innerText = h.toString().padStart(2,'0') + ':' + m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
+    },1000);
+    modInterval=setInterval(()=>{
+        if(!examPaused) moduleSeconds++;
+        let mm=Math.floor(moduleSeconds/60);
+        let ref = getModuleRefMin(currentDynamicModules[curExamModuleIndex]);
+        document.getElementById('moduleElapsed').innerText=new Date(moduleSeconds*1000).toISOString().substr(11,8);
+        if(mm > ref) document.getElementById('moduleWarn').innerHTML='<span class="time-warning">⚠️ 超时</span>';
+        else document.getElementById('moduleWarn').innerHTML='';
+    },1000);
+}
+
+function pauseExam() { if(!examActive || examPaused) return; examPaused=true; document.getElementById('examPauseBtn').innerText='▶️ 继续考试'; document.getElementById('examPauseBtn').onclick=resumeExam; }
+function resumeExam() { if(!examActive || !examPaused) return; examPaused=false; document.getElementById('examPauseBtn').innerText='⏸️ 暂停考试'; document.getElementById('examPauseBtn').onclick=pauseExam; }
+
+function finishCurrentModule() {
+    moduleTimeSpent.push(moduleSeconds);
+    curExamModuleIndex++;
+    if(curExamModuleIndex >= currentDynamicModules.length) {
+        endExamAndShowResult();
+    } else {
+        moduleSeconds=0;
+        document.getElementById('moduleElapsed').innerText='00:00:00';
+        let newMod = currentDynamicModules[curExamModuleIndex];
+        document.getElementById('curModuleName').innerText = newMod;
+        document.getElementById('refMin').innerText = getModuleRefMin(newMod);
+        document.getElementById('moduleWarn').innerHTML='';
+        if(examPaused) resumeExam();
+    }
+}
+
+function startExam(){
+    if(examActive) return;
+    examSavedFlag=false; examLastWarn15=false; examLastWarn5=false; examPaused=false;
+    moduleTimeSpent=[]; curExamModuleIndex=0; examGlobalSeconds=0; moduleSeconds=0;
+    examStartTimeStr=new Date().toLocaleTimeString();
+    document.getElementById('examSetupPanel').style.display='none';
+    document.getElementById('examRunPanel').style.display='block';
+    document.getElementById('examResultPanel').style.display='none';
+    let totalMin=parseInt(document.getElementById('examTotalMin').value);
+    currentExamConfig={
+        totalMinutes:totalMin,
+        scoreMode:document.getElementById('scoreModeSelect').value,
+        sameScore:parseFloat(document.getElementById('sameScoreVal').value),
+        perScores:[
+            parseFloat(document.getElementById('scoreYanyu').value),
+            parseFloat(document.getElementById('scoreLuoji').value),
+            parseFloat(document.getElementById('scoreZiliao').value),
+            parseFloat(document.getElementById('scoreChangshi').value),
+            parseFloat(document.getElementById('scoreShuliang').value)
+        ],
+        yanyu:parseInt(document.getElementById('yanyuNum').value),
+        luoji:parseInt(document.getElementById('luojiNum').value),
+        ziliao:parseInt(document.getElementById('ziliaoNum').value),
+        changshi:parseInt(document.getElementById('changshiNum').value),
+        shuliang:parseInt(document.getElementById('shuliangNum').value)
+    };
+    currentDynamicModules = examModuleOrder.slice();
+    document.getElementById('curModuleName').innerText = currentDynamicModules[0];
+    document.getElementById('refMin').innerText = getModuleRefMin(currentDynamicModules[0]);
+    startExamTimers();
+    examActive=true;
+    document.getElementById('examPauseBtn').innerText='⏸️ 暂停考试';
+    document.getElementById('examPauseBtn').onclick=pauseExam;
+}
+
+function forceStopExam(){
+    if(globalInterval)clearInterval(globalInterval);
+    if(modInterval)clearInterval(modInterval);
+    globalInterval=null; modInterval=null;
+    while(moduleTimeSpent.length<currentDynamicModules.length) moduleTimeSpent.push(moduleSeconds);
+    endExamAndShowResult();
+}
+
+function endExamAndShowResult(){
+    examActive=false;
+    clearInterval(globalInterval); clearInterval(modInterval);
+    globalInterval=null; modInterval=null;
+    document.getElementById('examRunPanel').style.display='none';
+    document.getElementById('examResultPanel').style.display='block';
+    let timeHtml=currentDynamicModules.map((mod,idx)=>{
+        let ref = getModuleRefMin(mod);
+        return mod + ': ' + Math.floor(moduleTimeSpent[idx]/60) + '分' + moduleTimeSpent[idx]%60 + '秒 / 参考' + ref + '分' + (moduleTimeSpent[idx] > ref*60 ? ' ⚠️超时' : '');
+    }).join('<br>');
+    document.getElementById('timeReportArea').innerHTML=timeHtml;
+    let rightsDiv='';
+    currentDynamicModules.forEach((mod,i)=>{
+        rightsDiv+= '<div class="score-input-row"><span>'+mod+'答对</span><input type="number" id="rightMod_'+i+'" placeholder="0" oninput="computeScorePreview()"></div>';
+    });
+    document.getElementById('dynamicRightInputs').innerHTML=rightsDiv;
+    computeScorePreview();
+    document.getElementById('saveExamFinalBtn').disabled=false;
+}
+
+function computeScorePreview(){
+    let perScores=currentExamConfig.scoreMode==='same'?Array(5).fill(currentExamConfig.sameScore):currentExamConfig.perScores;
+    let rights=currentDynamicModules.map((_,i)=>parseInt(document.getElementById('rightMod_'+i)?.value||0));
+    let total=0; let html='';
+    rights.forEach((r,i)=>{
+        let score=r*perScores[i];
+        total+=score;
+        html+=currentDynamicModules[i]+': '+r+'题 × '+perScores[i]+'分 = '+score.toFixed(1)+'分<br>';
+    });
+    html+='<hr><strong>总分: '+total.toFixed(1)+'分</strong>';
+    document.getElementById('scorePreviewBox').innerHTML=html;
+    window.lastExamScores=rights;
+    window.lastExamTotal=total;
+}
+
+function saveExamFinal(){
+    if(examSavedFlag){ alert("本场考试已保存过！"); return; }
+    if(!window.lastExamScores){ computeScorePreview(); }
+    let endTimeStr=new Date().toLocaleTimeString();
+    let record={
+        id:Date.now(), date:getTodayStr(), totalScore:window.lastExamTotal.toFixed(1),
+        moduleScores:window.lastExamScores.map((r,i)=>r*(currentExamConfig.scoreMode==='same'?currentExamConfig.sameScore:currentExamConfig.perScores[i])),
+        moduleRights:window.lastExamScores, timeSpentPerMod:moduleTimeSpent, totalSeconds:examGlobalSeconds,
+        startTime:examStartTimeStr, endTime:endTimeStr, moduleOrder:currentDynamicModules, config:currentExamConfig
+    };
+    examResults.push(record);
+    localStorage.setItem('examResults',JSON.stringify(examResults));
+    examSavedFlag=true;
+    alert("考试记录已保存！");
+    renderExamRecordList(); drawAllCharts(); updateAnalysisTab(); resetExamUI();
+}
+
+function resetExamUI(){
+    document.getElementById('examSetupPanel').style.display='block';
+    document.getElementById('examRunPanel').style.display='none';
+    document.getElementById('examResultPanel').style.display='none';
+    examSavedFlag=false;
+    if(globalInterval)clearInterval(globalInterval);
+    if(modInterval)clearInterval(modInterval);
+    globalInterval=null; modInterval=null;
+    examActive=false; examPaused=false;
+}
+
+function renderExamRecordList(){
+    let container=document.getElementById('examRecordContainer');
+    if(!container)return;
+    if(examResults.length===0){ container.innerHTML='<div class="no-data">暂无考试记录</div>'; return; }
+    container.innerHTML=examResults.slice().reverse().map(rec=>
+        '<div class="exam-record-item"><div><b>'+rec.date+'</b> '+(rec.startTime||'?')+'-'+(rec.endTime||'?')+' 总分'+rec.totalScore+'分<br>用时'+Math.floor(rec.totalSeconds/60)+'分钟</div><button class="record-del" onclick="viewExamDetail('+rec.id+')">查看报告</button><button class="record-del" style="background:#a55;" onclick="deleteExam('+rec.id+')">删除</button></div>'
+    ).join('');
+}
+function viewExamDetail(id){
+    let rec=examResults.find(r=>r.id===id);
+    if(!rec)return;
+    let detail='<h4>'+rec.date+' 模考</h4><p>总分: '+rec.totalScore+'分</p><p>模块顺序: '+(rec.moduleOrder||[]).join('→')+'</p><p>各模块得分: '+(rec.moduleOrder||[]).map((m,i)=>m+': '+rec.moduleScores[i].toFixed(1)+'分').join(' | ')+'</p><p>各模块用时: '+rec.timeSpentPerMod.map((t,i)=>(rec.moduleOrder||[])[i]+': '+Math.floor(t/60)+'分'+t%60+'秒').join('<br>')+'</p><p>考试时间段: '+rec.startTime+' - '+rec.endTime+'</p>';
+    document.getElementById('examDetailHtml').innerHTML=detail;
+    document.getElementById('examDetailModal').style.display='flex';
+}
+function deleteExam(id){ examResults=examResults.filter(r=>r.id!==id); localStorage.setItem('examResults',JSON.stringify(examResults)); renderExamRecordList(); drawAllCharts(); updateAnalysisTab(); }
+
+// 新增图表：模块正确率趋势 + 每日做题量
+function drawModuleCorrectTrend() {
+    let moduleName = document.getElementById('trendModuleSelect').value;
+    if(!moduleName) return;
+    let dates = [];
+    let correctRates = [];
+    let today = new Date();
+    for(let i=29; i>=0; i--) {
+        let d = new Date(); d.setDate(today.getDate() - i);
+        let dateStr = d.toLocaleDateString();
+        let dayRecords = studyRecords.filter(r => r.date === dateStr && r.module === moduleName);
+        let totalQ = dayRecords.reduce((s,r)=>s+r.totalQ,0);
+        let rightQ = dayRecords.reduce((s,r)=>s+r.rightQ,0);
+        let rate = totalQ > 0 ? (rightQ / totalQ * 100) : null;
+        dates.push((d.getMonth()+1) + '/' + d.getDate());
+        correctRates.push(rate);
+    }
+    if(moduleCorrectTrendChart) moduleCorrectTrendChart.destroy();
+    let isDark = document.body.classList.contains('dark');
+    let textColor = isDark ? '#cbd5e1' : '#333';
+    moduleCorrectTrendChart = new Chart(document.getElementById('moduleCorrectTrendChart'), {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: moduleName + ' 正确率 (%)',
+                data: correctRates,
+                borderColor: '#2c7da0',
+                fill: false,
+                tension: 0.2,
+                spanGaps: true
+            }]
+        },
+        options: {
+            scales: { y: { min: 0, max: 100, title: { display: true, text: '正确率 (%)' }, ticks: { color: textColor } }, x: { ticks: { color: textColor } } },
+            plugins: { legend: { labels: { color: textColor } }, tooltip: { callbacks: { label: (ctx) => ctx.raw !== null ? ctx.raw.toFixed(1) + '%' : '无数据' } } }
+        }
+    });
+}
+
+function drawDailyQuestions() {
+    let dates = [];
+    let questionsData = [];
+    let today = new Date();
+    for(let i=29; i>=0; i--) {
+        let d = new Date(); d.setDate(today.getDate() - i);
+        let dateStr = d.toLocaleDateString();
+        let totalQ = studyRecords.filter(r => r.date === dateStr).reduce((s,r)=>s+r.totalQ,0);
+        dates.push((d.getMonth()+1) + '/' + d.getDate());
+        questionsData.push(totalQ);
+    }
+    if(dailyQuestionsChart) dailyQuestionsChart.destroy();
+    let isDark = document.body.classList.contains('dark');
+    let textColor = isDark ? '#cbd5e1' : '#333';
+    dailyQuestionsChart = new Chart(document.getElementById('dailyQuestionsChart'), {
+        type: 'bar',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: '每日做题量 (道)',
+                data: questionsData,
+                backgroundColor: '#f39c12'
+            }]
+        },
+        options: {
+            scales: { y: { ticks: { color: textColor } }, x: { ticks: { color: textColor } } },
+            plugins: { legend: { labels: { color: textColor } } }
+        }
+    });
+}
+
+// 通用绘图
+function drawAllCharts() { refreshStudyCharts(); drawScoreTrend(); drawModuleTrend(); drawDailyCurve(); drawModuleCorrectTrend(); drawDailyQuestions(); }
+
+function refreshStudyCharts() {
+    let type=document.getElementById('studyStatsType')?.value||'day';
+    let filtered=studyRecords.filter(r=>{
+        let d=new Date(r.date), now=new Date();
+        if(type==='day') return r.date===getTodayStr();
+        if(type==='week'){let start=new Date(now); start.setDate(now.getDate()-now.getDay()); return d>=start;}
+        if(type==='month') return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+        return true;
+    });
+    let modMap={};
+    customModules.forEach(m=>{modMap[m]={time:0,totalQ:0,rightQ:0};});
+    filtered.forEach(r=>{if(modMap[r.module]){modMap[r.module].time+=r.minutes; modMap[r.module].totalQ+=r.totalQ; modMap[r.module].rightQ+=r.rightQ;}});
+    let labels=Object.keys(modMap).filter(k=>modMap[k].time>0);
+    let timeData=labels.map(k=>modMap[k].time);
+    let rateData=labels.map(k=>modMap[k].totalQ?Math.round(modMap[k].rightQ/modMap[k].totalQ*100):0);
+    let isDark = document.body.classList.contains('dark');
+    let textColor = isDark ? '#cbd5e1' : '#333';
+    if(studyTimeChart)studyTimeChart.destroy();
+    if(labels.length===0){ document.getElementById('studyTimeChart').style.display='none'; }
+    else { document.getElementById('studyTimeChart').style.display='block'; studyTimeChart=new Chart(document.getElementById('studyTimeChart'),{type:'bar',data:{labels,datasets:[{label:'学习时长(分钟)',data:timeData,backgroundColor:'#3b82f6'}]},options:{scales:{x:{ticks:{color:textColor}},y:{ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}}); }
+    if(studyRateChart)studyRateChart.destroy();
+    if(labels.length===0){ document.getElementById('studyRateChart').style.display='none'; }
+    else { document.getElementById('studyRateChart').style.display='block'; studyRateChart=new Chart(document.getElementById('studyRateChart'),{type:'bar',data:{labels,datasets:[{label:'正确率(%)',data:rateData,backgroundColor:'#10b981'}]},options:{scales:{x:{ticks:{color:textColor}},y:{ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}}); }
+}
+
+function drawScoreTrend(){
+    let container=document.getElementById('scoreTrendContainer');
+    if(!container) return;
+    container.innerHTML='<canvas id="scoreTrendChartCanvas" height="180"></canvas>';
+    let canvas=document.getElementById('scoreTrendChartCanvas');
+    if(examResults.length===0){ container.innerHTML='<div class="no-data">暂无考试数据</div>'; return; }
+    let labels=examResults.map((_,i)=>'第'+(i+1)+'次');
+    let scores=examResults.map(r=>parseFloat(r.totalScore));
+    let isDark = document.body.classList.contains('dark');
+    let textColor = isDark ? '#cbd5e1' : '#333';
+    if(scoreTrendChart)scoreTrendChart.destroy();
+    scoreTrendChart=new Chart(canvas,{type:'line',data:{labels,datasets:[{label:'总分趋势',data:scores,borderColor:'#2c7da0',fill:false}]},options:{scales:{x:{ticks:{color:textColor}},y:{ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}});
+}
+
+function drawModuleTrend(){
+    let container=document.getElementById('moduleTrendContainer');
+    if(!container) return;
+    container.innerHTML='<canvas id="moduleTrendCanvas" height="250"></canvas>';
+    let canvas=document.getElementById('moduleTrendCanvas');
+    if(examResults.length===0){ container.innerHTML='<div class="no-data">暂无考试数据</div>'; return; }
+    let labels=examResults.map((_,i)=>'第'+(i+1)+'次');
+    let moduleNames=examResults[0].moduleOrder||["言语","逻辑","资料","常识","数量"];
+    let colors=['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6'];
+    let datasets=moduleNames.map((name,i)=>({label:name,data:examResults.map(r=>r.moduleScores[i]?.toFixed(1)||0),borderWidth:2,borderColor:colors[i%colors.length]}));
+    let isDark = document.body.classList.contains('dark');
+    let textColor = isDark ? '#cbd5e1' : '#333';
+    if(moduleTrendChart)moduleTrendChart.destroy();
+    moduleTrendChart=new Chart(canvas,{type:'line',data:{labels,datasets},options:{scales:{x:{ticks:{color:textColor}},y:{ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}});
+}
+
+function drawDailyCurve(){
+    let container=document.getElementById('dailyCurveContainer');
+    if(!container) return;
+    container.innerHTML='<canvas id="dailyCurveCanvas" height="200"></canvas>';
+    let canvas=document.getElementById('dailyCurveCanvas');
+    let last7=[];
+    for(let i=6;i>=0;i--){
+        let d=new Date(); d.setDate(d.getDate()-i);
+        let dateStr=d.toLocaleDateString();
+        let minutes=studyRecords.filter(r=>r.date===dateStr).reduce((s,r)=>s+r.minutes,0);
+        last7.push({date:(d.getMonth()+1)+'/'+d.getDate(),minutes});
+    }
+    let isDark = document.body.classList.contains('dark');
+    let textColor = isDark ? '#cbd5e1' : '#333';
+    if(dailyCurveChart)dailyCurveChart.destroy();
+    dailyCurveChart=new Chart(canvas,{type:'bar',data:{labels:last7.map(d=>d.date),datasets:[{label:'学习时长(分钟)',data:last7.map(d=>d.minutes),backgroundColor:'#f39c12'}]},options:{scales:{x:{ticks:{color:textColor}},y:{ticks:{color:textColor}}},plugins:{legend:{labels:{color:textColor}}}}});
+}
+
+function updateAnalysisTab(){
+    let weakMap={};
+    studyRecords.forEach(r=>{
+        if(r.totalQ){
+            let err=r.totalQ-r.rightQ;
+            if(!weakMap[r.module])weakMap[r.module]={errCount:0,reasonCount:{}};
+            weakMap[r.module].errCount+=err;
+            weakMap[r.module].reasonCount[r.reason]=(weakMap[r.module].reasonCount[r.reason]||0)+1;
+        }
+    });
+    mistakeList.forEach(m=>{
+        if(!weakMap[m.module])weakMap[m.module]={errCount:0,reasonCount:{}};
+        weakMap[m.module].errCount+=1;
+        weakMap[m.module].reasonCount[m.reason]=(weakMap[m.module].reasonCount[m.reason]||0)+1;
+    });
+    let top3=Object.entries(weakMap).sort((a,b)=>b[1].errCount-a[1].errCount).slice(0,3);
+    document.getElementById('weakTop3').innerHTML=top3.map(([m,d])=>m+': 错'+d.errCount+'题').join('<br>')||"暂无数据";
+    let reasonTotal={};
+    Object.values(weakMap).forEach(v=>{Object.entries(v.reasonCount).forEach(([r,c])=>reasonTotal[r]=(reasonTotal[r]||0)+c);});
+    document.getElementById('reasonStat').innerHTML=Object.entries(reasonTotal).map(([k,v])=>k+': '+v+'次').join('<br>')||"暂无";
+    let advice=top3.length?'重点突破'+top3[0][0]+'，建议专项刷题':"坚持每日学习";
+    document.getElementById('improveAdvice').innerHTML=advice;
+}
+
+// 模块管理
+function manageModules(){ let div=document.getElementById('moduleListDom'); div.innerHTML=customModules.map((m,i)=>'<div style="display:flex;justify-content:space-between;padding:8px;">'+m+'<button onclick="removeModule('+i+')" class="record-del">删除</button></div>').join(''); document.getElementById('moduleModal').style.display='flex'; }
+function addModuleItem(){ let name=document.getElementById('newModuleName').value.trim(); if(name&&!customModules.includes(name)){ customModules.push(name); localStorage.setItem('customModules',JSON.stringify(customModules)); renderModuleSelects(); manageModules(); } document.getElementById('newModuleName').value=''; }
+function removeModule(idx){ customModules.splice(idx,1); localStorage.setItem('customModules',JSON.stringify(customModules)); renderModuleSelects(); manageModules(); }
+
+function moveModule(idx, delta) { let newIdx = idx+delta; if(newIdx<0 || newIdx>=examModuleOrder.length) return; [examModuleOrder[idx], examModuleOrder[newIdx]] = [examModuleOrder[newIdx], examModuleOrder[idx]]; localStorage.setItem('examModuleOrder',JSON.stringify(examModuleOrder)); renderExamOrderList(); }
+
+function toggleDarkMode(){ dark=!dark; document.body.classList.toggle('dark',dark); localStorage.setItem('darkTheme',dark); drawAllCharts(); }
+function saveTarget(){ dailyTargetHour=parseFloat(document.getElementById('targetHourSetting').value); localStorage.setItem('dailyTargetHour',dailyTargetHour); refreshHomeStats(); }
+
+function exportCSV(){
+    let headers=["日期","模块","时长(分钟)","总题数","正确数","正确率","错因","开始时间","结束时间"];
+    let rows=studyRecords.map(r=>[r.date,r.module,r.minutes,r.totalQ,r.rightQ, r.totalQ?Math.round(r.rightQ/r.totalQ*100):0, r.reason, r.startTime||'', r.endTime||'']);
+    let csv=[headers.join(','),...rows.map(row=>row.map(cell=>'"'+cell+'"').join(','))].join('\n');
+    let blob=new Blob(["﻿"+csv],{type:'text/csv'});
+    let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='学习记录_'+getTodayStr()+'.csv'; a.click(); URL.revokeObjectURL(a.href);
+}
+
+function exportFullData(){
+    let data={studyRecords,taskItems,taskArchives,examResults,mistakeList,customModules,examModuleOrder};
+    let json=JSON.stringify(data,null,2);
+    let blob=new Blob([json],{type:'application/json'});
+    let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='公考学习备份_'+getTodayStr()+'.json'; a.click(); URL.revokeObjectURL(a.href);
+}
+
+function importData(){
+    let input=document.createElement('input'); input.type='file'; input.accept='application/json';
+    input.onchange=e=>{
+        let file=e.target.files[0]; let reader=new FileReader();
+        reader.onload=ev=>{
+            try{
+                let data=JSON.parse(ev.target.result);
+                if(data.studyRecords) localStorage.setItem('studyRecords',JSON.stringify(data.studyRecords));
+                if(data.taskItems) localStorage.setItem('taskItems',JSON.stringify(data.taskItems));
+                if(data.taskArchives) localStorage.setItem('taskArchives',JSON.stringify(data.taskArchives));
+                if(data.examResults) localStorage.setItem('examResults',JSON.stringify(data.examResults));
+                if(data.mistakeList) localStorage.setItem('mistakeList',JSON.stringify(data.mistakeList));
+                if(data.customModules) localStorage.setItem('customModules',JSON.stringify(data.customModules));
+                if(data.examModuleOrder) localStorage.setItem('examModuleOrder',JSON.stringify(data.examModuleOrder));
+                alert("导入成功，即将刷新"); location.reload();
+            }catch(err){ alert("文件格式错误"); }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function clearAllData(){ if(confirm("⚠️ 清除所有数据不可恢复！")){ localStorage.clear(); location.reload(); } }
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+
+// 初始化
+function init() {
+    if(dark) document.body.classList.add('dark');
+    document.getElementById('targetHourSetting').value = dailyTargetHour;
+    if(targetExamDate) document.getElementById('targetExamDate').value = targetExamDate;
+    updateExamCountdown();
+    renderModuleSelects();
+    renderStudyLogs();
+    renderTaskUI();
+    renderExamRecordList();
+    renderMistakeList();
+    refreshHomeStats();
+    renderExamOrderList();
+    drawAllCharts();
+    updateAnalysisTab();
+    renderCalendar();
+    initReminder();
+    // 日期筛选默认当天
+    let now = new Date();
+    let yyyy = now.getFullYear();
+    let mm = (now.getMonth()+1).toString().padStart(2,'0');
+    let dd = now.getDate().toString().padStart(2,'0');
+    document.getElementById('filterDate').value = yyyy + '-' + mm + '-' + dd;
+    renderStudyLogs();
+    setTimeout(()=>{ if(Notification.permission === 'default') requestNotificationPerm(); }, 2000);
+    // 屏幕常亮
+    if('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(()=>{});
+}
+init();
+
+// 注册 Service Worker
+if('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+        console.log('Service Worker 注册成功');
+    }).catch(err => {
+        console.log('Service Worker 注册失败:', err);
+    });
+}
+</script>
+</body>
+</html>
